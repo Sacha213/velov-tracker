@@ -87,10 +87,10 @@ def get_auth_token():
 
 def fetch_stations():
     url = "https://download.data.grandlyon.com/ws/rdata/jcd_jcdecaux.jcdvelov/all.json"
-    print(f"Tentative de récupération des stations depuis : {url}")
+    #print(f"Tentative de récupération des stations depuis : {url}")
     try:
         response = requests.get(url, timeout=20) # Augmentation du timeout
-        print(f"Statut de la réponse : {response.status_code}")
+        #print(f"Statut de la réponse : {response.status_code}")
         response.raise_for_status() # Lèvera une exception pour les codes d'erreur HTTP
         
         try:
@@ -240,7 +240,7 @@ def git_commit_and_push():
         commit_message = f"Mise à jour des données Vélo'V - {current_time_utc.strftime('%Y-%m-%d UTC')}"
 
         # Etape 1: git add
-        print(f"Tentative d'exécution de 'git add' pour : {BIKE_TRIPS_FILE} dans {PROJECT_DIR}")
+        #print(f"Tentative d'exécution de 'git add' pour : {BIKE_TRIPS_FILE} dans {PROJECT_DIR}")
         add_process = subprocess.run(
             [GIT_EXECUTABLE, 'add', BIKE_TRIPS_FILE],
             capture_output=True, text=True, cwd=PROJECT_DIR # Spécifier le CWD
@@ -253,7 +253,7 @@ def git_commit_and_push():
             # Si 'git add' échoue, il est inutile de continuer.
             return 
         else:
-            print("'git add' exécuté avec succès.")
+            #print("'git add' exécuté avec succès.")
 
         # Etape 2: Vérifier les changements stagés
         # `git diff --staged --quiet` renvoie 0 s'il n'y a pas de changements stagés, 1 s'il y en a.
@@ -266,7 +266,7 @@ def git_commit_and_push():
             print("Aucun changement stagé à commiter pour les fichiers de données et log.")
             return
         else:
-            print("Changements stagés détectés, tentative de commit.")
+            #print("Changements stagés détectés, tentative de commit.")
 
         # Etape 3: git commit
         # Vérifie si un commit pour aujourd'hui a déjà été fait
@@ -283,7 +283,7 @@ def git_commit_and_push():
                 print(f"Sortie d'erreur 'git commit':\n{commit_process.stderr}")
                 return
             else:
-                print(f"Commit effectué avec le message : {commit_message}")
+                #print(f"Commit effectué avec le message : {commit_message}")
             
             # Etape 4: git push
             push_process = subprocess.run(
@@ -296,7 +296,7 @@ def git_commit_and_push():
                 print(f"Sortie d'erreur 'git push':\n{push_process.stderr}")
                 return
             else:
-                print("Push effectué avec succés.")
+                #print("Push effectué avec succés.")
                 if push_process.stdout: print(f"Sortie standard 'git push':\n{push_process.stdout}")
                 if push_process.stderr: print(f"Sortie d'erreur 'git push' (peut contenir des infos utiles même en cas de succès):\n{push_process.stderr}")
 
@@ -320,11 +320,11 @@ def main():
     if not stations:
         print("Aucune station n'a pu être récupérée. Arrêt du script.")
         return
-    print(f"{len(stations)} stations trouvées.")
+    #print(f"{len(stations)} stations trouvées.")
     
     try:
         token = get_auth_token()
-        print(f"Token obtenu.")
+        #print(f"Token obtenu.")
     except RuntimeError as e:
         print(f"Erreur critique lors de l'obtention du token: {e}")
         return
@@ -340,7 +340,7 @@ def main():
     processed_count = 0
     error_stations_count = 0
 
-    print(f"Début du scan des vélos avec {MAX_WORKERS} workers...")
+    #print(f"Début du scan des vélos avec {MAX_WORKERS} workers...")
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_to_station = {
             executor.submit(process_station_data, sta, sess, [], [], []): sta
@@ -360,7 +360,7 @@ def main():
                 sys.stdout.write(f"\rStations scannées : {processed_count}/{len(stations)} (Erreurs stations: {error_stations_count})")
                 sys.stdout.flush()
     
-    print(f"\nScan terminé. {len(current_bikes_scan_data_list)} vélos trouvés présents dans les stations.")
+    #print(f"\nScan terminé. {len(current_bikes_scan_data_list)} vélos trouvés présents dans les stations.")
 
     # Créer un dictionnaire des vélos actuellement scannés pour un accès facile par numéro de vélo
     current_bikes_map = {str(b.get('number')): b for b in current_bikes_scan_data_list if b.get('number')}
@@ -432,8 +432,8 @@ def main():
 
     # 4. Sauvegarder le nouvel état des vélos
     save_json_data(BIKE_STATES_FILE, new_bike_states)
-    print(f"État des vélos sauvegardé dans {BIKE_STATES_FILE}.")
-    print(f"Trajets enregistrés dans {BIKE_TRIPS_FILE} (si détectés).")
+    #print(f"État des vélos sauvegardé dans {BIKE_STATES_FILE}.")
+    #print(f"Trajets enregistrés dans {BIKE_TRIPS_FILE} (si détectés).")
     
     # 5. Faire un commit et un push des modifications
     # Le message est maintenant généré directement dans la fonction git_commit_and_push
